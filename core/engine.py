@@ -43,7 +43,7 @@ class ContentDownloader:
                     lnk = []
                     for e in lst:
                         lnk.append(e.get('node', {}).get('display_url', None))
-                        return [f'{l}&dl=1' for l in lnk]
+                    return [f'{l}&dl=1' for l in lnk]
             else:
                 lst = self._elem.get('carousel_media', [])
                 if len(lst) > 0:
@@ -53,7 +53,7 @@ class ContentDownloader:
                         i = e.get('image_versions2', {}).get('candidates', [])
                         if len(i) > 0:
                             lnk.append(i[0].get('url', None))
-                            return [f'{l}&dl=1' for l in lnk]
+                    return [f'{l}&dl=1' for l in lnk]
         else:
             return None
 

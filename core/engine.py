@@ -13,10 +13,10 @@ class ContentDownloader:
     def get_media_type(self):
         if self._is_graphql:
             mtype = self._elem.get('__typename', None)
-            return 'video' if mtype == 'GraphVideo' else 'image' if mtype == 'GraphImage' else 'unknown'
+            return 'video' if mtype == 'GraphVideo' else 'image' if mtype == 'GraphImage' else 'carousel' if mtype == 'GraphSidecar' else 'unknown'
 
         mtype = self._elem.get('media_type', None)
-        return 'video' if mtype == 2 else 'image' if mtype == 1 else 'unknown'
+        return 'video' if mtype == 2 else 'image' if mtype == 1 else 'carousel' if mtype == 8 else 'unknown'
 
     def get_media_download_link(self):
         lnk = None
@@ -31,9 +31,28 @@ class ContentDownloader:
             if self._is_graphql:
                 lnk = self._elem.get('display_url', None)
             else:
-                i = self._elem.get('image_versions', {}).get('candidates', [])
+                i = self._elem.get('image_versions2', {}).get('candidates', [])
                 if len(i) > 0:
                     lnk = i[0].get('url', None)
+        elif self.get_media_type() == 'carousel':
+            if self._is_graphql:
+                lst = self._elem.get(
+                    'edge_sidecar_to_children', {}).get('edges', [])
+                if len(lst) > 0:
+                    # make link as array
+                    lnk = []
+                    for e in lst:
+                        lnk.append(e.get('node', {}).get('display_url', None))
+                    return [f'{l}&dl=1' for l in lnk]
+            else:
+                lst = self._elem.get('carousel_media', [])
+                if len(lst) > 0:
+                    # make link as array
+                    lnk = []
+                    for e in lst:
+                        i = e.get('image_versions2', {}).get('candidates', [])
+                        if len(i) > 0:
+                            lnk.append(i[0].get('url', None))
         else:
             return None
 
@@ -44,9 +63,20 @@ class ContentDownloader:
             if self._is_graphql:
                 return self._elem.get('display_url', None)
             else:
-                i = self._elem.get('image_versions', {}).get('candidates', [])
+                i = self._elem.get('image_versions2', {}).get('candidates', [])
                 if len(i) > 0:
                     return i[0].get('url', None)
+        elif self.get_media_type() == 'carousel':
+            # get the single preview image
+            if self._is_graphql:
+                lst = self._elem.get(
+                    'edge_sidecar_to_children', {}).get('edges', [])
+                if len(lst) > 0:
+                    return lst[0].get('node', {}).get('display_url', None)
+            else:
+                lst = self._elem.get('carousel_media', [])
+                if len(lst) > 0:
+                    return lst[0].get('image_versions2', {}).get('candidates', [])[0].get('url', None)
 
         return None
 

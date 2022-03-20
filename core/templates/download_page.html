@@ -9,6 +9,12 @@
 <body>
     <p>Download {{media_type}}</p>
     <img src="{{preview_link}}" alt="">
+    {% if media_type == 'carousel' %}
+    {% for lnk in download_link %}
+    <a href="{{lnk}}" target="_blank">Download Media {{forloop.counter}}</a>
+    {% endfor %}
+    {% else %}
     <a href="{{download_link}}" target="_blank">Download {{media_type}}</a>
+    {% endif %}
 </body>
 </html>
